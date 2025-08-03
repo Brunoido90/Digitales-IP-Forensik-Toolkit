@@ -1,208 +1,276 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digitales IP-Forensik-Toolkit</title>
-    <!-- Tailwind CSS über CDN für einfaches Styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Digitales IP-Forensik-Toolkit</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Leaflet.js für interaktive Karte -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+</style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-2xl w-full">
-        <h1 class="text-3xl font-bold mb-4 text-center text-indigo-400">Digitales IP-Forensik-Toolkit</h1>
-        <p class="text-center mb-6 text-gray-400">
-            Geben Sie eine IP-Adresse ein, um Geolocation- und WHOIS-Informationen abzurufen.
-        </p>
-
-        <!-- Eingabebereich für die IP-Adresse -->
-        <div class="flex flex-col md:flex-row gap-4 mb-6">
-            <input
-                type="text"
-                id="ip-input"
-                placeholder="IP-Adresse eingeben (z.B. 8.8.8.8)"
-                class="flex-grow p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-200"
-            />
-            <button
-                id="lookup-button"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-lg shadow-md transition-all duration-200"
-            >
-                Starten
-            </button>
-        </div>
-
-        <!-- Status- und Fehlermeldungen -->
-        <div id="status-message" class="hidden p-4 rounded-lg text-center mb-6"></div>
-
-        <!-- Container für Ergebnisse -->
-        <div id="results-container" class="hidden">
-            <!-- Geolocation-Ergebnisse -->
-            <div class="bg-gray-700 p-6 rounded-lg shadow-inner mt-4">
-                <div class="flex items-center mb-4">
-                    <h2 class="text-2xl font-bold text-indigo-300">Geolocation-Ergebnisse</h2>
-                    <div id="geo-spinner" class="ml-4 hidden">
-                        <svg class="animate-spin h-5 w-5 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="data-fields">
-                    <!-- Daten werden hier eingefügt -->
-                </div>
-            </div>
-
-            <!-- Karte -->
-            <div class="bg-gray-700 p-2 rounded-lg shadow-inner mt-4 w-full h-[400px]">
-                <h2 class="text-2xl font-bold text-indigo-300 mb-2">Karte</h2>
-                <iframe
-                    id="map-iframe"
-                    class="h-full w-full rounded-lg border-none"
-                    title="Standort auf Karte"
-                    style="border: 0"
-                    allowfullscreen
-                ></iframe>
-            </div>
-
-            <!-- WHOIS/RDAP-Ergebnisse -->
-            <div class="bg-gray-700 p-6 rounded-lg shadow-inner mt-4">
-                <div class="flex items-center mb-4">
-                    <h2 class="text-2xl font-bold text-indigo-300">RDAP-Ergebnisse</h2>
-                    <div id="whois-spinner" class="ml-4 hidden">
-                        <svg class="animate-spin h-5 w-5 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    </div>
-                </div>
-                <pre id="whois-results" class="bg-gray-900 text-gray-200 p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">Hier erscheinen die RDAP/WHOIS-Ergebnisse.</pre>
-            </div>
-        </div>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex justify-center items-center p-4">
+<div class="max-w-4xl w-full bg-gray-800 p-6 rounded-xl shadow-2xl space-y-4">
+  <h1 class="text-3xl font-bold mb-2 text-center text-indigo-400">Digitales IP-Forensik-Toolkit</h1>
+  <p class="text-center mb-4 text-gray-400">Geben Sie eine IP-Adresse ein, um Geolocation- und WHOIS-Informationen abzurufen.</p>
+  
+  <!-- Eingabe & Button -->
+  <div class="flex flex-col md:flex-row gap-4 mb-4">
+    <input
+      type="text"
+      id="ip-input"
+      placeholder="IP-Adresse eingeben (z.B. 8.8.8.8)"
+      class="flex-grow p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-200"
+    />
+    <button
+      id="lookup-button"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-lg shadow-md flex items-center justify-center"
+    >
+      <svg class="h-5 w-5 mr-2 animate-spin hidden" id="button-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span id="button-text">Starten</span>
+    </button>
+  </div>
+  
+  <!-- Statusmeldung -->
+  <div id="status-message" class="hidden p-4 rounded-lg text-center mb-4"></div>
+  
+  <!-- Ergebnisse -->
+  <div id="results-area" class="space-y-4 hidden">
+    <!-- Geolocation -->
+    <div class="bg-gray-700 p-4 rounded-lg shadow-inner" id="geolocation-section">
+      <h2 class="text-xl font-semibold mb-2 text-indigo-300">Geolocation-Ergebnisse</h2>
+      <div id="geo-details" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
     </div>
+    <!-- Map -->
+    <div class="bg-gray-700 p-4 rounded-lg shadow-inner" id="map-container">
+      <h2 class="text-xl font-semibold mb-2 text-indigo-300">Karte</h2>
+      <div id="map" class="h-64 rounded-lg"></div>
+    </div>
+    <!-- WHOIS -->
+    <div class="bg-gray-700 p-4 rounded-lg shadow-inner" id="whois-section">
+      <h2 class="text-xl font-semibold mb-2 text-indigo-300">RDAP-Ergebnisse</h2>
+      <pre id="whois-data" class="bg-gray-900 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap text-sm text-gray-200">Hier erscheinen die RDAP/WHOIS-Daten.</pre>
+    </div>
+    <!-- IP-Historie -->
+    <div class="bg-gray-700 p-4 rounded-lg shadow-inner" id="history-section">
+      <h2 class="text-xl font-semibold mb-2 text-indigo-300">IP-Historie</h2>
+      <ul id="history-list" class="list-disc list-inside text-gray-200"></ul>
+      <div class="mt-2 flex space-x-2">
+        <button id="export-history" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded">Exportieren</button>
+        <button id="clear-history" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        const ipInput = document.getElementById('ip-input');
-        const lookupButton = document.getElementById('lookup-button');
-        const statusMessage = document.getElementById('status-message');
-        const resultsContainer = document.getElementById('results-container');
-        const dataFields = document.getElementById('data-fields');
-        const mapIframe = document.getElementById('map-iframe');
-        const whoisResults = document.getElementById('whois-results');
-        const geoSpinner = document.getElementById('geo-spinner');
-        const whoisSpinner = document.getElementById('whois-spinner');
+<script>
+const ipInput = document.getElementById('ip-input');
+const btn = document.getElementById('lookup-button');
+const spinner = document.getElementById('button-spinner');
+const btnText = document.getElementById('button-text');
+const statusMsg = document.getElementById('status-message');
+const resultsDiv = document.getElementById('results-area');
 
-        // Funktion zur Validierung des IP-Adressformats
-        function isValidIp(ipAddress) {
-            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-fA-F]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
-            return ipv4Regex.test(ipAddress) || ipv6Regex.test(ipAddress);
-        }
+const geoDetailsDiv = document.getElementById('geo-details');
+const whoisPre = document.getElementById('whois-data');
+const mapContainer = document.getElementById('map');
+const mapDiv = document.getElementById('map');
+const historyList = document.getElementById('history-list');
 
-        // Funktion, um den Status anzuzeigen
-        function showStatus(message, isError = false) {
-            statusMessage.textContent = message;
-            statusMessage.className = `p-4 rounded-lg text-center mb-6 ${isError ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`;
-            statusMessage.classList.remove('hidden');
-        }
+let map, marker;
 
-        // Asynchrone Funktion, um die Abfragen zu starten
-        async function handleLookup() {
-            const ip = ipInput.value.trim();
-            if (!isValidIp(ip)) {
-                showStatus("Ungültiges IP-Format. Bitte eine gültige IPv4- oder IPv6-Adresse eingeben.", true);
-                resultsContainer.classList.add('hidden');
-                return;
+// Funktion: Statusmeldung
+function showStatus(msg, isError=false) {
+  statusMsg.className = `p-4 rounded-lg mb-4 ${isError ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`;
+  statusMsg.textContent = msg;
+  statusMsg.classList.remove('hidden');
+}
+function hideStatus() { statusMsg.classList.add('hidden'); }
+
+// IP-Validierung
+function isValidIp(ip) {
+  const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-fA-F]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+}
+
+// Ergebnis anzeigen
+function displayResults(geoData, whoisData) {
+  // Geolocation mit vielen Details
+  const geoHtml = `
+    <div><strong>Land:</strong> ${geoData.country || 'Nicht verfügbar'}</div>
+    <div><strong>Stadt:</strong> ${geoData.city || 'Nicht verfügbar'}</div>
+    <div><strong>Region:</strong> ${geoData.region || 'Nicht verfügbar'}</div>
+    <div><strong>Postleitzahl:</strong> ${geoData.postal || 'Nicht verfügbar'}</div>
+    <div><strong>ISP:</strong> ${geoData.isp || 'Nicht verfügbar'}</div>
+    <div><strong>Organisation:</strong> ${geoData.org || 'Nicht verfügbar'}</div>
+    <div><strong>Breitengrad:</strong> ${geoData.latitude || 'Nicht verfügbar'}</div>
+    <div><strong>Längengrad:</strong> ${geoData.longitude || 'Nicht verfügbar'}</div>
+    <div><strong>Zeitzone:</strong> ${geoData.timezone || 'Nicht verfügbar'}</div>
+    <div><strong>IP-Adresse:</strong> ${geoData.ip || 'Nicht verfügbar'}</div>
+    <div><strong>Netzwerkname:</strong> ${geoData.netname || 'Nicht verfügbar'}</div>
+  `;
+  geoDetailsDiv.innerHTML = geoHtml;
+
+  // Karte aktualisieren
+  const lat = geoData.latitude || 51.505;
+  const lon = geoData.longitude || -0.09;
+  if (!map) {
+    map = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+  } else {
+    map.setView([lat, lon], 13);
+  }
+  if (marker) {
+    marker.setLatLng([lat, lon]);
+  } else {
+    marker = L.marker([lat, lon]).addTo(map);
+  }
+
+  // RDAP/WHOIS mit mehr Details
+  let html = '';
+  if (typeof whoisData === 'object') {
+    html += `<div><strong>Registrar:</strong> ${whoisData.registrar || 'Nicht verfügbar'}</div>`;
+    html += `<div><strong>Status:</strong> ${whoisData.status || 'Nicht verfügbar'}</div>`;
+    html += `<div><strong>Name:</strong> ${whoisData.name || 'Nicht verfügbar'}</div>`;
+    html += `<div><strong>Netzwerkname:</strong> ${whoisData.ldhName || whoisData.name || 'Nicht verfügbar'}</div>`;
+    html += `<div><strong>Abuse-Email:</strong> ${whoisData.abuseEmail || 'Nicht verfügbar'}</div>`;
+    html += `<div><strong>Port 43:</strong> ${whoisData.port43 || 'Nicht verfügbar'}</div>`;
+
+    // Kontaktinfos
+    if (whoisData.entities && Array.isArray(whoisData.entities)) {
+      whoisData.entities.forEach((entity, index) => {
+        html += `<div class="mt-2"><strong>Kontakt ${index + 1}:</strong></div>`;
+        if (entity.vcardArray && Array.isArray(entity.vcardArray)) {
+          const vcard = entity.vcardArray[1];
+          vcard.forEach(item => {
+            if (item[0] === 'fn') {
+              html += `<div>- Name: ${item[3]}</div>`;
             }
-
-            lookupButton.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Suche...`;
-            lookupButton.disabled = true;
-            statusMessage.classList.add('hidden');
-            resultsContainer.classList.remove('hidden');
-
-            // Setzt alle Ergebnisse zurück
-            dataFields.innerHTML = '';
-            whoisResults.textContent = 'RDAP-Ergebnisse werden geladen...';
-
-            // Gleichzeitiges Abrufen von Geolocation und WHOIS
-            try {
-                // Geolocation-Abfrage mit ipwhois.app
-                geoSpinner.classList.remove('hidden');
-                const geoResponse = await fetch(`https://ipwhois.app/json/${ip}`);
-                const geoData = await geoResponse.json();
-                if (geoData.success !== true) {
-                    throw new Error(`Geolocation-Fehler: ${geoData.message || 'Daten nicht verfügbar.'}`);
-                }
-                displayGeoResults(geoData);
-
-                // WHOIS/RDAP-Abfrage mit rdap.org
-                whoisSpinner.classList.remove('hidden');
-                const whoisResponse = await fetch(`https://rdap.org/ip/${ip}`);
-                const whoisData = await whoisResponse.json();
-                if (whoisResponse.status === 404) {
-                    whoisResults.textContent = "RDAP-Eintrag nicht gefunden oder nicht verfügbar.";
-                } else if (!whoisResponse.ok) {
-                    throw new Error(`RDAP-Fehler: Status ${whoisResponse.status}`);
-                } else {
-                    displayWhoisResults(whoisData);
-                }
-            } catch (e) {
-                showStatus(e.message, true);
-                whoisResults.textContent = e.message;
-            } finally {
-                lookupButton.textContent = 'Starten';
-                lookupButton.disabled = false;
-                geoSpinner.classList.add('hidden');
-                whoisSpinner.classList.add('hidden');
+            if (item[0] === 'email') {
+              html += `<div>- Email: ${item[3]}</div>`;
             }
-        }
-
-        // Funktion, um die Geolokalisierungs-Ergebnisse anzuzeigen
-        function displayGeoResults(data) {
-            dataFields.innerHTML = `
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Land</p>
-                    <p class="text-lg font-semibold">${data.country || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Stadt</p>
-                    <p class="text-lg font-semibold">${data.city || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Region</p>
-                    <p class="text-lg font-semibold">${data.region || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Postleitzahl</p>
-                    <p class="text-lg font-semibold">${data.postal || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg col-span-1 md:col-span-2">
-                    <p class="text-gray-400">Internetanbieter (ISP)</p>
-                    <p class="text-lg font-semibold">${data.isp || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Breitengrad (Lat)</p>
-                    <p class="text-lg font-semibold">${data.latitude || 'Nicht verfügbar'}</p>
-                </div>
-                <div class="p-4 bg-gray-600 rounded-lg">
-                    <p class="text-gray-400">Längengrad (Lon)</p>
-                    <p class="text-lg font-semibold">${data.longitude || 'Nicht verfügbar'}</p>
-                </div>
-            `;
-
-            const lat = data.latitude || 51.505;
-            const lon = data.longitude || -0.09;
-            mapIframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.01}%2C${lat - 0.01}%2C${lon + 0.01}%2C${lat + 0.01}&marker=${lat}%2C${lon}&zoom=13`;
-        }
-
-        // Funktion, um die WHOIS/RDAP-Ergebnisse anzuzeigen
-        function displayWhoisResults(data) {
-            whoisResults.textContent = JSON.stringify(data, null, 2);
-        }
-
-        lookupButton.addEventListener('click', handleLookup);
-        ipInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleLookup();
+            if (item[0] === 'tel') {
+              html += `<div>- Telefon: ${item[3]}</div>`;
             }
-        });
-    </script>
+            if (item[0] === 'adr') {
+              const addrParts = item[3]; // Array
+              html += `<div>- Adresse: ${addrParts.join(', ')}</div>`;
+            }
+          });
+        }
+      });
+    }
+  } else {
+    html = `<div>${JSON.stringify(whoisData)}</div>`;
+  }
+  whoisPre.innerHTML = html;
+}
+
+// Funktion: Abfrage starten
+async function handleLookup() {
+  const ip = ipInput.value.trim();
+  if (!isValidIp(ip)) {
+    showStatus("Ungültiges IP-Format. Bitte eine gültige IPv4- oder IPv6-Adresse eingeben.", true);
+    resultsDiv.classList.add('hidden');
+    return;
+  }
+
+  // Ergebnisse sichtbar machen
+  resultsDiv.classList.remove('hidden');
+  hideStatus();
+
+  // Button
+  spinner.classList.remove('hidden');
+  btnText.textContent = 'Lädt...';
+  btn.disabled = true;
+
+  // Ergebnisse zurücksetzen
+  geoDetailsDiv.innerHTML = '';
+  whoisPre.innerHTML = 'Lade RDAP/WHOIS...';
+
+  try {
+    // Geolocation API
+    const geoRes = await fetch(`https://ipwhois.app/json/${ip}`);
+    const geoData = await geoRes.json();
+    if (geoData.success !== true) throw new Error(`Geolokation: ${geoData.message || 'Daten nicht verfügbar'}`);
+
+    // RDAP API
+    const whoisRes = await fetch(`https://rdap.org/ip/${ip}`);
+    let whoisData = {};
+    if (whoisRes.status === 404) {
+      whoisData = { message: 'Kein RDAP-Eintrag gefunden.' };
+    } else if (!whoisRes.ok) {
+      throw new Error(`RDAP-Fehler: ${whoisRes.status}`);
+    } else {
+      whoisData = await whoisRes.json();
+    }
+
+    // Ergebnisse anzeigen
+    displayResults(geoData, whoisData);
+    saveIpToHistory(ip);
+  } catch (e) {
+    showStatus(e.message, true);
+  } finally {
+    spinner.classList.add('hidden');
+    btnText.textContent = 'Starten';
+    btn.disabled = false;
+  }
+}
+
+// IP-Historie speichern
+function saveIpToHistory(ip) {
+  let history = JSON.parse(localStorage.getItem('ipHistory')) || [];
+  if (!history.includes(ip)) {
+    history.push(ip);
+    localStorage.setItem('ipHistory', JSON.stringify(history));
+    updateHistory();
+  }
+}
+// Historie anzeigen
+function updateHistory() {
+  const history = JSON.parse(localStorage.getItem('ipHistory')) || [];
+  historyList.innerHTML = '';
+  history.forEach(ip => {
+    const li = document.createElement('li');
+    li.textContent = ip;
+    li.className='cursor-pointer hover:underline';
+    li.onclick = () => {
+      ipInput.value = ip;
+      handleLookup();
+    };
+    historyList.appendChild(li);
+  });
+}
+// Export & Löschen
+document.getElementById('export-history').onclick = () => {
+  const hist = JSON.parse(localStorage.getItem('ipHistory')) || [];
+  const dataStr = 'data:text/plain;charset=utf-8,' + encodeURIComponent(hist.join('\n'));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = 'ip-historie.txt';
+  a.click();
+};
+document.getElementById('clear-history').onclick = () => {
+  localStorage.removeItem('ipHistory');
+  updateHistory();
+};
+
+// Event Listener
+document.getElementById('lookup-button').addEventListener('click', handleLookup);
+ipInput.addEventListener('keypress', (e) => { if (e.key==='Enter') handleLookup(); });
+
+// Initiale Historie laden
+updateHistory();
+</script>
 </body>
 </html>
