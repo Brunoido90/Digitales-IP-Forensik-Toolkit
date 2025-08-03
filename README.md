@@ -1,15 +1,27 @@
-Was macht das Digitale IP-Forensik-Toolkit?
-Das Tool ist eine einfache, webbasierte Anwendung, die dafür entwickelt wurde, schnell und effizient grundlegende Informationen über eine beliebige IPv4- oder IPv6-Adresse zu sammeln. Es dient als erster Schritt bei digitalen Ermittlungen, indem es zwei wesentliche Arten von Daten abruft: Geolocation- und RDAP-Informationen.
+Digitales IP-Forensik-Toolkit
+Dieses Web-basierte Tool ermöglicht die detaillierte Analyse einer IP-Adresse durch die Integration von Geolocation- und RDAP/WHOIS-Daten. Es bietet eine interaktive Karte, erweiterte Informationsanzeigen sowie eine IP-Historie-Funktion mit Export- und Löschmöglichkeiten.
 
-1. Geolocation-Abfrage
-Mit dieser Funktion kann das Tool den ungefähren physischen Standort einer IP-Adresse bestimmen. Nach Eingabe einer IP-Adresse wird eine Karte mit den geografischen Koordinaten angezeigt. Gleichzeitig werden wichtige Details wie das Land, die Stadt, die Region und der Internetanbieter (ISP) des Netzwerks abgerufen.
+Funktionen
+IP-Eingabe & Validierung: Überprüfung des IP-Formats (IPv4/IPv6).
+Geolocation-Details: Anzeige von Land, Stadt, Region, ISP, Organisation, Zeitzone, Netzwerkname, Koordinaten.
+Interaktive Karte: Darstellung des Standorts mit Leaflet.js, zoombar und klickbar.
+RDAP/WHOIS-Daten: Erweiterte Informationen wie Registrar, Status, Netzwerkname, Abuse-Email, Port 43, Kontaktinformationen (Name, Email, Telefon, Adresse).
+IP-Historie: Speicherung der eingegebenen IPs in LocalStorage, Anzeige der Historie mit Klickmöglichkeit zur erneuten Abfrage.
+Export & Löschen: Exportiere die IP-Historie als Textdatei oder lösche sie.
+Technische Details
+Frontend: HTML, Tailwind CSS, JavaScript
+Karten: Leaflet.js mit OpenStreetMap
+Datenquellen:
+Geolocation: ipwhois.app API
+RDAP: rdap.org API
+Nutzung
+IP-Adresse in das Eingabefeld eingeben.
+Auf "Starten" klicken oder Enter drücken.
+Die Ergebnisse werden in den Bereichen Geolocation, Karte, RDAP und IP-Historie angezeigt.
+Historie kann exportiert oder gelöscht werden.
+Hinweise
+Die API-Daten sind öffentlich und kostenlos, daher kann es gelegentlich zu Verzögerungen oder unvollständigen Daten kommen.
+Das Tool ist ideal für IT-Forensiker, Sicherheitsanalysten und alle, die eine schnelle IP-Analyse benötigen.
+Lizenz
+Dieses Projekt steht unter MIT License.
 
-Zweck: Hilft dabei, den geografischen Ursprung einer IP-Adresse zu lokalisierung.
-
-2. RDAP-Abfrage (WHOIS-Nachfolger)
-Dieser Teil des Tools fragt offizielle Internet-Registrierungsdatenbanken ab, um die administrative Hoheit über die IP-Adresse zu ermitteln. Die Abfrage liefert detaillierte Informationen über den IP-Block, einschließlich des Eigentümers (des Unternehmens oder der Organisation), technischer Kontakte und der für Missbrauchsfälle zuständigen Abteilung (abuse).
-
-Zweck: Stellt wichtige Kontaktdaten bereit, um bei Bedarf offizielle Anfragen an den Internetanbieter zu richten. Dies ist entscheidend für die Meldung von Sicherheitsvorfällen oder die Nachverfolgung von Bedrohungen.
-
-Fazit
-Zusammenfassend lässt sich sagen, dass dieses Toolkit eine effiziente Möglichkeit bietet, die zwei grundlegenden Fragen zu beantworten, die bei der Analyse einer IP-Adresse aufkommen: "Wo befindet sie sich?" und "Wer ist dafür verantwortlich?" Es bündelt diese Funktionen in einer übersichtlichen Oberfläche, um die ersten Schritte jeder digitalen Forensik-Untersuchung zu vereinfachen.
